@@ -310,6 +310,7 @@ class FaceBoundingBox:
                 "padding": ("INT", { "default": 0, "min": 0, "max": 4096, "step": 1 }),
                 "padding_percent": ("FLOAT", { "default": 0.0, "min": 0.0, "max": 2.0, "step": 0.05 }),
                 "index": ("INT", { "default": -1, "min": -1, "max": 4096, "step": 1 }),
+                "skip_no_face": ("BOOLEAN", {"default": False}),
             },
         }
 
@@ -319,7 +320,7 @@ class FaceBoundingBox:
     CATEGORY = "FaceAnalysis"
     OUTPUT_IS_LIST = (True, True, True, True, True,)
 
-    def bbox(self, analysis_models, image, padding, padding_percent, index=-1):
+    def bbox(self, analysis_models, image, padding, padding_percent, index=-1, skip_no_face=False):
         out_img = []
         out_x = []
         out_y = []
@@ -336,7 +337,10 @@ class FaceBoundingBox:
             out_h.extend(h)
 
         if not out_img:
-            raise Exception('No face detected in image.')
+            if skip_no_face:
+                return (out_img,out_x,out_y,out_w,out_h,)
+            else:
+                raise Exception("No face detected in image.")
 
         if len(out_img) == 1:
             index = 0
